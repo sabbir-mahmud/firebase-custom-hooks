@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createUserWithEmailAndPassword, FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, sendEmailVerification, signInWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, updatePassword, updateProfile } from "firebase/auth";
 import auth from "../Firebase/firebase.init";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -32,7 +32,7 @@ const UseFirebase = () => {
     const HandleLogin = (e) => {
         e.preventDefault();
         setLoading(true);
-        const email = e.target.elements.email.value; // from elements property
+        const email = e.target.email.value; // from elements property
         const password = e.target.password.value;
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
@@ -116,7 +116,7 @@ const UseFirebase = () => {
     // handle sign up
     const handleSignUp = (e) => {
         e.preventDefault();
-        const email = e.target.elements.email.value; // from elements property
+        const email = e.target.email.value; // from elements property
         const userPassword = e.target.firstPassword.value;
         const ConfirmPassword = e.target.ConfirmPassword.value;
         const fullName = e.target.fullName.value;
@@ -159,9 +159,41 @@ const UseFirebase = () => {
             });
     }
 
+    // reset password with email
+    const handleResetPassword = (e) => {
+        e.preventDefault();
+        const email = e.target.elements.email.value; // from elements property
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                console.log("password reset email sent");
+                navigate('/login')
+            })
+            .catch((error) => {
 
-    // return { user, email, password, error, loading, handleEmail, handlePassword, handleFullName, handleLogin };
-    return { user, error, loading, HandleLogin, HandleGoogleLogin, handleFacebookLogin, handleGithubLogin, handleSignUp, handleLogout };
+            });
+    }
+
+    // update password
+    const handleChangePassword = (e) => {
+        e.preventDefault();
+        const firstPassword = e.target.firstPassword.value;
+        const secondPassword = e.target.secondPassword.value;
+
+        let password = '';
+        if (firstPassword === secondPassword) {
+            password = firstPassword;
+        }
+        updatePassword(user, password).then(() => {
+            handleLogout();
+            navigate('/login')
+            // Update successful.
+        }).catch((error) => {
+            // An error ocurred
+            // ...
+        });
+    }
+
+    return { user, error, loading, HandleLogin, HandleGoogleLogin, handleFacebookLogin, handleGithubLogin, handleSignUp, handleLogout, handleResetPassword, handleChangePassword };
 }
 
 export default UseFirebase;
